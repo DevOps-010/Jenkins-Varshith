@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                branch: '*/main' , git: 'https://github.com/DevOps-010/Jenkins-Varshith.git'
+                branch: 'main' , git: 'https://github.com/DevOps-010/Jenkins-Varshith.git'
             }
         }
         
