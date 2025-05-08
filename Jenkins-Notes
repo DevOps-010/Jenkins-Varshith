@@ -1,0 +1,134 @@
+
+Jenkins 
+    Jenkins is an open-source automation server used for building, testing, and deploying software, particularly in the context of Continuous Integration and Continuous Delivery (CI/CD)
+
+Jenkins uses a distributed Master-Slave architecture for managing CI/CD pipelines. The core components are the Jenkins controller (Master) and Jenkins agents (Slaves), which communicate over TCP/IP. The Master manages jobs, distributes them to Slaves, monitors Slave status, and presents build results to the user.
+        ![alt text](image.png)
+
+    jenkins also have docker agent architecture i.e
+        ![alt text](image-1.png)  
+      In the Docker agent architecture, Jenkins follows a "create-use-dispose" pattern 
+
+
+[
+    in industry we use virtual mechine to install jenkins 
+    so the installation process is first we need to create a vm on whatever cloud we use then using the ip address ssh into that vm 
+    the cmd is `ssh user@ip_address` and to install docker on same vm the cmd is `sudo apt install docker.io` ,  so whatever docker as we know docker run docker demon process by default it is not accessable to other users  means root user can access so for that 
+    we need grant access to docker demon `sudo su-  / usermod -aG docker jenkins / usermod -aG docker ububtu / systemctl restart docker`
+    the whole idea is to jenkins can create and run containers and images 
+    and if we implement docker agent architecture then we need to install docker pipeline plugin 
+
+
+]
+
+basic pipelie for  jenkins docker as agaent
+                        pipeline{
+                            agaent{
+                                docker {image: node:18-alpine}
+                            }
+                            stages{
+                                stage(test){
+                                    step{
+                                        sh 'node --version'
+                                    }
+                                }
+                            }
+                        }
+
+
+
+
+
+what is multi stage and multi agent: 
+     Multi-Stage Pipelines
+        Multi-stage pipelines break down the CI/CD process into sequential, logically separated phases. Each stage represents a distinct step in your delivery pipeline.
+            Example Multi-Stage Pipeline:
+                pipeline {
+                    agent any
+                    stages {
+                        stage('Build') {
+                            steps {
+                                sh 'mvn compile'
+                            }
+                        }
+                        stage('Test') {
+                            steps {
+                                sh 'mvn test'
+                            }
+                        }
+                        stage('Code Analysis') {
+                            steps {
+                                sh 'mvn sonar:sonar'
+                            }
+                        }
+                        stage('Package') {
+                            steps {
+                                sh 'mvn package'
+                            }
+                        }
+                        stage('Deploy') {
+                            steps {
+                                sh 'deploy-script.sh'
+                            }
+                        }
+                    }
+                }
+
+
+    Multi-Agent Pipelines
+    Multi-agent pipelines use different execution environments for different stages, allowing each stage to run in the most appropriate environment for its tasks.
+        Example Multi-Agent Pipeline:
+        
+                    pipeline {
+                    agent none  // No global agent - each stage specifies its own
+                    
+                    stages {
+                        stage('Build') {
+                            agent {
+                                docker { image 'maven:3.8.6-openjdk-11' }
+                            }
+                            steps {
+                                sh 'mvn compile'
+                            }
+                        }
+                        stage('Test') {
+                            agent {
+                                docker { image 'maven:3.8.6-openjdk-11' }
+                            }
+                            steps {
+                                sh 'mvn test'
+                            }
+                        }
+                        stage('Windows Test') {
+                            agent {
+                                label 'windows'  // Runs on a Windows agent
+                            }
+                            steps {
+                                bat 'run-windows-tests.bat'
+                            }
+                        }
+                        stage('Security Scan') {
+                            agent {
+                                docker { image 'security-scanner:latest' }
+                            }
+                            steps {
+                                sh 'run-security-scan.sh'
+                            }
+                        }
+                        stage('Deploy') {
+                            agent {
+                                docker { 
+                                    image 'deployment-tools:latest'
+                                    args '-v /var/credentials:/credentials'
+                                }
+                            }
+                            steps {
+                                sh 'deploy-to-production.sh'
+                            }
+                        }
+                    }
+                }
+
+
+
+                
