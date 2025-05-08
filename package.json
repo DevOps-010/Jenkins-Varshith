@@ -1,0 +1,14 @@
+{
+    "name": "my-app",
+    "version": "1.0.0",
+    "description": "Sample application for auto-recovery pipeline",
+    "main": "src/app.js",
+    "scripts": {
+      "test": "jest",
+      "build": "echo 'Building application...' && exit 0"
+    },
+    "dependencies": {},
+    "devDependencies": {
+      "jest": "^29.5.0"
+    }
+  }
